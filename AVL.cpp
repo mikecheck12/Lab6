@@ -14,7 +14,7 @@ int main() {
 	string item;
 
 	ifstream in;
-	in.open("in81.txt");
+	in.open("in60.txt");
 
 	//ofstream out;
 	//out.open("actual.txt");
@@ -36,7 +36,7 @@ int main() {
 		}
 		if (cmd == "find") {
 			in >> item;
-			cout << "find " << item << " " << tree.find(item) << endl;
+			cout << "find " << item << " " << boolalpha << tree.find(item) << endl;
 		}
 		if (cmd == "print") {
 			tree.print();			//pass out when writing to file
