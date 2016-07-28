@@ -128,18 +128,23 @@ public:
 			return true;
 		}
 		else {
-			Node* removeNode = n;
+			Node* removeNode;
+
 			if (n->left == NULL) {
+				removeNode = n;
 				n = n->right;
+				delete removeNode;
 			}
 			else if (n->right == NULL) {
+				removeNode = n;
 				n = n->left;
+				delete removeNode;
 			}
 			else {
 				n->item = findMin(n->right);
 				remove(n->right, n->item);
 			}
-			delete removeNode;
+			//delete removeNode;
 			return true;
 		}
 
@@ -178,13 +183,13 @@ public:
 						cout << endl;
 					}
 					auto item = printQueue.pop_front();				//where do I add children as it will effect the size
-						if (item->right != NULL) {
-							printQueue.push_back(item->right);
-						}
 						if (item->left != NULL) {
 							printQueue.push_back(item->left);
 						}
-						cout << item->item << " (" << getHeight(item) << ")";
+						if (item->right != NULL) {
+							printQueue.push_back(item->right);
+						}
+						cout << item->item << "(" << getHeight(item) << ") ";
 					//cout << printQueue.pop_front() << " " << getHeight(i->item);
 
 				}
