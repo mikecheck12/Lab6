@@ -7,45 +7,44 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char*argv[]) {
 
 	AVLTreeSet<string> tree;
 	string cmd;
 	string item;
 
 	ifstream in;
-	in.open("in60.txt");
+        in.open(argv[1]);
 
-	//ofstream out;
-	//out.open("actual.txt");
+        ofstream out;
+        out.open(argv[2]);
 
 	while (in >> cmd) {
 		if (cmd == "clear") {
-			cout << "clear" << endl;
+                        out << "clear" << endl;
 			tree.clear();
 		}
 		if (cmd == "add") {
 			in >> item;
-			cout << "add " << item << endl;
+                        out << "add " << item << endl;
 			tree.insert(item);
 		}
 		if (cmd == "remove") {
 			in >> item;
-			cout << "remove " << item << endl;
+                        out << "remove " << item << endl;
 			tree.remove(item);
 		}
 		if (cmd == "find") {
 			in >> item;
-			cout << "find " << item << " " << boolalpha << tree.find(item) << endl;
+                        out << "find " << item << " " << boolalpha << tree.find(item) << endl;
 		}
 		if (cmd == "print") {
-			tree.print();			//pass out when writing to file
+                        tree.print(out);	//pass out when writing to file
 		}
 	}
 
-	//out.close();
+        out.close();
 	
 
-	system ("pause");
 	return 0;
 }

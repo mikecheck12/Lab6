@@ -198,6 +198,8 @@ public:
 				else {
 					n->item = findMin(n->right);
 					remove(n->right, n->item);
+                                        setHeight(n);                   //added for last test...
+                                        balanceAVL(n);
 				}
 				//delete removeNode;
 				return true;
@@ -231,35 +233,37 @@ public:
 
 //PRINT FUNCTION ---------------------------------
 
-	void print() {
+	void print(ofstream& out) {
 		int queueSize;
 		int level = 0;
 		int max = 8;
 		LinkedList<Node*> printQueue;
 
-		cout << "print" << endl;
+		out << "print" << endl;
 
 		if (root != NULL) {
 			printQueue.push_back(root);
 			while (printQueue.getSize() != 0) {				
 				queueSize = printQueue.getSize();
-				cout << "level " << level << ": ";
-				for (int i = 0; i < queueSize; i++) {
-					if (queueSize > max) {
-						cout << endl;
-					}
-					auto item = printQueue.pop_front();				
+				out << "level " << level << ":";
+				for (int i = 0, j = 0; i < queueSize; i++, j++) {
+						auto item = printQueue.pop_front();				
 						if (item->left != NULL) {
 							printQueue.push_back(item->left);
 						}
 						if (item->right != NULL) {
 							printQueue.push_back(item->right);
 						}
-						cout << item->item << "(" << getHeight(item) << ") ";
+						if (j == max) {
+                                                    j = 0;
+                                                    out << endl;
+                                                    out << "level " << level << ":";
+                                                }
+						out << " " << item->item << "(" << getHeight(item) << ")";
 
 				}
 				level++;
-				cout << endl;
+				out << endl;
 			}
 		}
 	}
