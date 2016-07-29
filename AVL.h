@@ -47,7 +47,7 @@ public:
 
 //GET HEIGHT FUNCTION --------------------------------
 
-	int getHeight(Node* n) {
+	int getHeight(Node*& n) {
 		if (n == NULL) {
 			return 0;
 		}
@@ -58,12 +58,61 @@ public:
 
 //SET HEIGHT FUNCTION ---------------------------------
 
-	void setHeight(Node* n) {
+	void setHeight(Node*& n) {
 		if (getHeight(n->right) > getHeight(n->left)) {
 			n->height = getHeight(n->right) + 1;
 		}
 		else {
 			n->height = getHeight(n->left) + 1;
+		}
+	}
+
+//ROTATE FUNCTION -----------------------------------
+
+	void rRight(Node*& n) {
+		Node* k = n->left;
+		n->left = k->right;
+		k->right = n;
+		setHeight(n);
+		setHeight(k);
+		n = k;
+
+	}
+
+	void rLeft(Node*& n) {
+		Node* k = n->right;
+		n->right = k->left;
+		k->left = n; 
+		setHeight(n);
+		setHeight(k);
+		n = k;
+		
+	}
+
+//BALANCE RIGHT/LEFT FUNCTIONS ---------------------------------
+
+	void balRight(Node*& n) {
+		if (getHeight(n->left->right) > getHeight(n->left->left)) {
+			rLeft(n->left);
+		}
+			rRight(n);
+	}
+
+	void balLeft(Node*& n) {
+		if (getHeight(n->right->left) > getHeight(n->right->right)) {
+			rRight(n->right);
+		}
+		rLeft(n);
+	}
+
+//BALANCE TREE FUNCTION -----------------------------------
+
+	void balanceAVL(Node*& n) {
+		if (getHeight(n->left) - getHeight(n->right) > 1) {
+			balRight(n);
+		}
+		else if (getHeight(n->right) - getHeight(n->left) > 1) {
+			balLeft(n);
 		}
 	}
 
@@ -74,19 +123,23 @@ public:
 	}
 
 	bool insert(Node*& n, const ItemType& item) {				//edit function to account for names alreqady included in the tree
+	  if(!find(item))
 		if (n == NULL) {
 			n = new Node(item);
+			balanceAVL(n);
 			return true;
 		}
 		else if (item < n->item) {
 			if (insert(n->left, item)) {
-				setHeight(n);					
+				setHeight(n);	
+				balanceAVL(n);
 				return true;
 			}
 		}
 		else if (item > n->item) {
 			if (insert(n->right, item)) {
-				setHeight(n);					
+				setHeight(n);	
+				balanceAVL(n);
 				return true;
 			}
 		}
@@ -114,44 +167,64 @@ public:
 	}
 
 	bool remove(Node*& n, const ItemType& item) {
+			if (!find(item) || n == NULL) {
+				return false;
+			}
+			else if (item < n->item) {
+				remove(n->left, item);
+				setHeight(n);
+				balanceAVL(n);
+				return true;
+			}
+			else if (item > n->item) {
+				remove(n->right, item);
+				setHeight(n);
+				balanceAVL(n);
+				return true;
+			}
+			else {
+				Node* removeNode;
+
+				if (n->left == NULL) {
+					removeNode = n;
+					n = n->right;
+					delete removeNode;
+				}
+				else if (n->right == NULL) {
+					removeNode = n;
+					n = n->left;
+					delete removeNode;
+				}
+				else {
+					n->item = findMin(n->right);
+					remove(n->right, n->item);
+                                        setHeight(n);                   //added for last test...
+                                        balanceAVL(n);
+				}
+				//delete removeNode;
+				return true;
+			}
+		}
+
+//FIND FUNCTION --------------------------------
+	
+	bool find(const ItemType& item) {
+		return find(root, item);
+	}
+
+	bool find(Node*& n, const ItemType& item) {
 		if (n == NULL) {
 			return false;
 		}
 		else if (item < n->item) {
-			remove(n->left, item);
-			setHeight(n);
-			return true;
+			return find(n->left, item);
 		}
 		else if (item > n->item) {
-			remove(n->right, item);
-			setHeight(n);
-			return true;
+			return find(n->right, item);
 		}
-		else {
-			Node* removeNode = n;
-			if (n->left == NULL) {
-				n = n->right;
-			}
-			else if (n->right == NULL) {
-				n = n->left;
-			}
-			else {
-				n->item = findMin(n->right);
-				remove(n->right, n->item);
-			}
-			delete removeNode;
-			return true;
-		}
-
+		return true;
 	}
-
-//FIND FUNCTION --------------------------------
-	bool find(const ItemType& item) {
-
-		return false;
-
-	}
-
+	
 //CLEAR WRAPPER FUNCTION --------------------------
 
 	void clear() {
@@ -160,36 +233,37 @@ public:
 
 //PRINT FUNCTION ---------------------------------
 
-	void print() {
+	void print(ofstream& out) {
 		int queueSize;
 		int level = 0;
 		int max = 8;
 		LinkedList<Node*> printQueue;
 
-		cout << "print" << endl;
+		out << "print" << endl;
 
 		if (root != NULL) {
 			printQueue.push_back(root);
 			while (printQueue.getSize() != 0) {				
 				queueSize = printQueue.getSize();
-				cout << "level " << level << ": ";
-				for (int i = 0; i < queueSize; i++) {
-					if (queueSize > max) {
-						cout << endl;
-					}
-					auto item = printQueue.pop_front();				//where do I add children as it will effect the size
-						if (item->right != NULL) {
-							printQueue.push_back(item->right);
-						}
+				out << "level " << level << ":";
+				for (int i = 0, j = 0; i < queueSize; i++, j++) {
+						auto item = printQueue.pop_front();				
 						if (item->left != NULL) {
 							printQueue.push_back(item->left);
 						}
-						cout << item->item << " (" << getHeight(item) << ")";
-					//cout << printQueue.pop_front() << " " << getHeight(i->item);
+						if (item->right != NULL) {
+							printQueue.push_back(item->right);
+						}
+						if (j == max) {
+                                                    j = 0;
+                                                    out << endl;
+                                                    out << "level " << level << ":";
+                                                }
+						out << " " << item->item << "(" << getHeight(item) << ")";
 
 				}
 				level++;
-				cout << endl;
+				out << endl;
 			}
 		}
 	}
